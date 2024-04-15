@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,9 +56,16 @@ public class AuthApi {
     }
 
     @GetMapping("/userinfo")
-    public ResponseEntity<ApiResponse<UserinfoResponse>> getUserinfo(Principal principal) {
-        String email = principal.getName();
-        UserinfoResponse result = authService.getUserinfo(email);
+    public ResponseEntity<ApiResponse<UserinfoResponse>> getUserinfo(
+            @RequestHeader("User-Id") String userId,
+            @RequestHeader("User-Email") String userEmail,
+            @RequestHeader("User-Role") String userRole
+    ) {
+        UserinfoResponse result = UserinfoResponse.builder()
+                .id(Long.parseLong(userId))
+                .email(userEmail)
+                .role(userRole)
+                .build();
         return ResponseEntity.ok().body(ApiResponse.success(result));
     }
 

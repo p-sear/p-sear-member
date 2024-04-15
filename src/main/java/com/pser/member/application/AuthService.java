@@ -3,19 +3,14 @@ package com.pser.member.application;
 import com.pser.member.config.TokenProvider;
 import com.pser.member.config.email.SmtpMailSender;
 import com.pser.member.dao.UserDao;
-import com.pser.member.domain.RoleEnum;
 import com.pser.member.domain.User;
 import com.pser.member.dto.AuthenticateResponse;
 import com.pser.member.dto.LoginRequest;
 import com.pser.member.dto.SendMailRequest;
 import com.pser.member.dto.SignupRequest;
-import com.pser.member.dto.UserinfoResponse;
 import com.pser.member.exception.LoginFailedException;
 import com.pser.member.exception.UserAlreadyExistsException;
 import com.pser.member.exception.UserNotAllowedException;
-import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +20,6 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -79,17 +73,11 @@ public class AuthService {
         return tokenProvider.refresh(refreshToken);
     }
 
-    public UserinfoResponse getUserinfo(String email) {
-        User user = findUserByEmail(email);
-        return UserinfoResponse.builder()
-                .build();
-    }
-
     public String createEmailAuthCode() {
         Random rnd = new Random();
         StringBuilder code = new StringBuilder();
         for (int i = 0; i < 6; i++) {
-            code.append(Integer.toString(rnd.nextInt(10)));
+            code.append(rnd.nextInt(10));
         }
         return code.toString();
     }
@@ -118,17 +106,5 @@ public class AuthService {
         String authCode = (String) redisTemplate.opsForValue().get(email);
 
         return emailCode.equals(authCode);
-    }
-
-    private User findUserByEmail(String email) {
-        Optional<User> user = userDao.findByEmail(email);
-        if (user.isEmpty()) {
-            throw new EntityNotFoundException();
-        }
-        return user.get();
-    }
-
-    private List<SimpleGrantedAuthority> toAuthorities(RoleEnum role) {
-        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 }

@@ -9,4 +9,6 @@ public class UserinfoResponse {
     private Long id;
 
     private String email;
+
+    private String role;
 }
