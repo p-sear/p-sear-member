@@ -4,10 +4,10 @@ import com.pser.member.config.TokenProvider;
 import com.pser.member.config.email.SmtpMailSender;
 import com.pser.member.dao.UserDao;
 import com.pser.member.domain.User;
-import com.pser.member.dto.AuthenticateResponse;
 import com.pser.member.dto.LoginRequest;
 import com.pser.member.dto.SendMailRequest;
 import com.pser.member.dto.SignupRequest;
+import com.pser.member.dto.TokenResponse;
 import com.pser.member.exception.LoginFailedException;
 import com.pser.member.exception.UserAlreadyExistsException;
 import com.pser.member.exception.UserNotAllowedException;
@@ -48,10 +48,9 @@ public class AuthService {
                 .build();
 
         userDao.save(user);
-
     }
 
-    public AuthenticateResponse authenticate(LoginRequest request) {
+    public TokenResponse authenticate(LoginRequest request) {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
         Authentication authentication;
@@ -63,9 +62,9 @@ public class AuthService {
             throw new LoginFailedException("존재하지 않는 유저입니다");
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return AuthenticateResponse.builder()
-                .token(tokenProvider.createToken(authentication))
-                .refreshToken(tokenProvider.createToken(authentication))
+        return TokenResponse.builder()
+                .token(tokenProvider.createToken(authentication, false))
+                .refreshToken(tokenProvider.createToken(authentication, true))
                 .build();
     }
 

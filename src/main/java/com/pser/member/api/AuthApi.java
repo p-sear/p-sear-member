@@ -3,11 +3,11 @@ package com.pser.member.api;
 import com.pser.member.application.AuthService;
 import com.pser.member.application.OAuthService;
 import com.pser.member.common.response.ApiResponse;
-import com.pser.member.dto.AuthenticateResponse;
 import com.pser.member.dto.ConfirmMailRequest;
 import com.pser.member.dto.LoginRequest;
 import com.pser.member.dto.SendMailRequest;
 import com.pser.member.dto.SignupRequest;
+import com.pser.member.dto.TokenResponse;
 import com.pser.member.dto.UserinfoResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,9 +43,9 @@ public class AuthApi {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<ApiResponse<AuthenticateResponse>> authenticate(
+    public ResponseEntity<ApiResponse<TokenResponse>> authenticate(
             @RequestBody @Validated LoginRequest request) {
-        AuthenticateResponse result = authService.authenticate(request);
+        TokenResponse result = authService.authenticate(request);
         return ResponseEntity.ok().body(ApiResponse.success(result));
     }
 
@@ -90,8 +90,11 @@ public class AuthApi {
     ) throws IOException {
         String redirectUrl = env.getProperty("oauth.front-uri");
         try {
-            String token = oAuthService.signupOrLoginByCode(code, oAuthType);
-            response.sendRedirect("%s?token=%s".formatted(redirectUrl, token));
+            TokenResponse tokenResponse = oAuthService.signupOrLoginByCode(code, oAuthType);
+            response.sendRedirect(
+                    "%s?token=%s&refresh=%s"
+                            .formatted(redirectUrl, tokenResponse.getToken(), tokenResponse.getRefreshToken())
+            );
         } catch (Exception e) {
             String encodedErrorMessage = URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
             response.sendRedirect("%s?error=%s".formatted(redirectUrl, encodedErrorMessage));
