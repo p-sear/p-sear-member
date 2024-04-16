@@ -29,22 +29,22 @@ public class TokenProvider {
         this.tokenValidityInSeconds = Util.getLongProperty(env, "jwt.token-validity-in-seconds");
     }
 
-    public String createToken(String email) {
+    public String createToken(String email, boolean isRefresh) {
         return Jwts.builder()
                 .setSubject(email)
                 .signWith(key, SignatureAlgorithm.HS512)
-                .setExpiration(getExpiration())
+                .setExpiration(getExpiration(isRefresh))
                 .setIssuedAt(new Date())
                 .compact();
     }
 
-    public String createToken(Authentication authentication) {
-        return createToken(authentication.getName());
+    public String createToken(Authentication authentication, boolean isRefresh) {
+        return createToken(authentication.getName(), isRefresh);
     }
 
     public String refresh(String refreshToken) {
         Claims claims = getClaims(refreshToken);
-        return createToken(claims.getSubject());
+        return createToken(claims.getSubject(), true);
     }
 
     private Claims getClaims(String token) {
@@ -68,9 +68,12 @@ public class TokenProvider {
         return claims;
     }
 
-    private Date getExpiration() {
+    private Date getExpiration(boolean isRefresh) {
         long nowMilliSeconds = new Date().getTime();
         long tokenValidityInMilliSeconds = tokenValidityInSeconds * 1000;
+        if (isRefresh) {
+            tokenValidityInMilliSeconds *= 30;
+        }
         long expirationMilliSeconds = nowMilliSeconds + tokenValidityInMilliSeconds;
         return new Date(expirationMilliSeconds);
     }

@@ -6,6 +6,7 @@ import com.pser.member.config.oauth.OAuthStrategy;
 import com.pser.member.dao.UserDao;
 import com.pser.member.domain.User;
 import com.pser.member.dto.OAuthUserDto;
+import com.pser.member.dto.TokenResponse;
 import com.pser.member.exception.SignupFailedException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -20,16 +21,19 @@ public class OAuthService {
     private final UserDao userDao;
     private final TokenProvider tokenProvider;
 
-    public String signupOrLoginByCode(String code, String oAuthType) {
+    public TokenResponse signupOrLoginByCode(String code, String oAuthType) {
         OAuthStrategy strategy = getStrategy(oAuthType);
         String oAuthAccessToken = strategy.getAccessToken(code);
         OAuthUserDto oAuthUserDto = strategy.getOAuthUser(oAuthAccessToken);
         return signupOrLogin(oAuthUserDto);
     }
 
-    private String signupOrLogin(OAuthUserDto oAuthUserDto) {
+    private TokenResponse signupOrLogin(OAuthUserDto oAuthUserDto) {
         User user = getOrCreateUser(oAuthUserDto);
-        return tokenProvider.createToken(user.getEmail());
+        return TokenResponse.builder()
+                .token(tokenProvider.createToken(user.getEmail(), false))
+                .refreshToken(tokenProvider.createToken(user.getEmail(), true))
+                .build();
     }
 
     private OAuthStrategy getStrategy(String oAuthType) {
