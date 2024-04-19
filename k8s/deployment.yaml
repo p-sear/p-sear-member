@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: member-deployment
+spec:
+  selector:
+    matchLabels:
+      app: p-ser-member
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: p-ser-member
+    spec:
+      volumes:
+        - name: app-config
+          configMap:
+            name: app-config
+      containers:
+        - name: member-container
+          image: amanecopse/p-ser-member
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: "/share"
+              name: app-config
