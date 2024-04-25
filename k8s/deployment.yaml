@@ -18,7 +18,8 @@ spec:
             name: app-config
       containers:
         - name: member-container
-          image: amanecopse/p-ser-member
+          image: amanecopse/p-ser-member:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           volumeMounts:
