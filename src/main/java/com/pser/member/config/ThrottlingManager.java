@@ -6,15 +6,15 @@ import io.github.bucket4j.Refill;
 import java.time.Duration;
 
 public class ThrottlingManager {
-    private static final int MAX_TOTAL_BUCKETS = 100;
-    private Bucket bucket;
+    private static final int BUCKET_LIMIT = 100;
+    private final Bucket bucket;
+
+    public ThrottlingManager() {
+        Bandwidth bandwidth = Bandwidth.classic(BUCKET_LIMIT, Refill.intervally(1, Duration.ofSeconds(1)));
+        bucket = Bucket.builder().addLimit(bandwidth).build();
+    }
 
     public boolean allowRequest() {
         return bucket.tryConsume(1);
-    }
-
-    private Bucket createBucket() {
-        Bandwidth limit = Bandwidth.classic(MAX_TOTAL_BUCKETS, Refill.intervally(1, Duration.ofSeconds(1)));
-        return Bucket.builder().addLimit(limit).build();
     }
 }
