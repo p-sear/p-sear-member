@@ -101,9 +101,17 @@ public class AuthService {
         redisTemplate.opsForValue().set(request.getEmail(), authCode, 5, TimeUnit.MINUTES);
     }
 
-    public Boolean confirmMail(String email, String emailCode) {
+    public boolean confirmMail(String email, String emailCode) {
         String authCode = (String) redisTemplate.opsForValue().get(email);
-
+        redisTemplate.delete(email);
         return emailCode.equals(authCode);
+    }
+
+    public Boolean confirmMailAndRefresh(String email, String emailCode) {
+        boolean isValid = confirmMail(email, emailCode);
+        if (isValid) {
+            redisTemplate.opsForValue().set(email, emailCode, 1, TimeUnit.HOURS);
+        }
+        return isValid;
     }
 }

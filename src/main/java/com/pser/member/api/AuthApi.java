@@ -78,7 +78,7 @@ public class AuthApi {
 
     @PostMapping("/confirm-mail")
     public ResponseEntity<ApiResponse<Boolean>> confirmMail(@RequestBody @Validated ConfirmMailRequest request) {
-        Boolean isCodeMatching = authService.confirmMail(request.getEmail(), request.getEmailCode());
+        Boolean isCodeMatching = authService.confirmMailAndRefresh(request.getEmail(), request.getEmailCode());
         return ResponseEntity.ok().body(ApiResponse.success(isCodeMatching));
     }
 
