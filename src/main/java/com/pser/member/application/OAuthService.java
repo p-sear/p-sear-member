@@ -58,6 +58,7 @@ public class OAuthService {
     private User createUser(OAuthUserDto oAuthUserDto) {
         User user = User.builder()
                 .email(oAuthUserDto.getEmail())
+                .username(oAuthUserDto.getName())
                 .password(oAuthUserDto.getStrategyCode())
                 .build();
         userDao.save(user);

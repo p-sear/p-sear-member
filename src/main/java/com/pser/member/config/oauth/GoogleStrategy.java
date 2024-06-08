@@ -42,6 +42,7 @@ public class GoogleStrategy implements OAuthStrategy {
         Map response = restTemplate.getForObject(url, Map.class);
         return OAuthUserDto.builder()
                 .email((String) response.get("email"))
+                .name((String) response.get("name"))
                 .strategyCode(getStrategyCode())
                 .build();
     }

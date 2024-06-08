@@ -12,5 +12,7 @@ public class OAuthUserDto {
     @Email
     private String email;
 
+    private String name;
+
     private String strategyCode;
 }
